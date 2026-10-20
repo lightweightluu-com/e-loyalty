@@ -1,0 +1,67 @@
+// SQLite-Datenbank: läuft lokal und auf jedem VPS ohne externe Abhängigkeit.
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+enum TransactionType {
+  STAMP_ADDED
+  REWARD_REDEEMED
+}
+
+model Merchant {
+  id           String           @id @default(cuid())
+  email        String           @unique
+  passwordHash String
+  name         String
+  createdAt    DateTime         @default(now())
+  programs     LoyaltyProgram[]
+}
+
+model LoyaltyProgram {
+  id              String         @id @default(cuid())
+  merchantId      String
+  shopName        String
+  primaryColor    String         @default("#14532d")
+  backgroundColor String         @default("#f7f5ef")
+  logoEmoji       String         @default("⭐")
+  stampsRequired  Int            @default(10)
+  rewardTitle     String
+  createdAt       DateTime       @default(now())
+  merchant        Merchant       @relation(fields: [merchantId], references: [id], onDelete: Cascade)
+  cards           CustomerCard[]
+
+  @@index([merchantId])
+}
+
+model CustomerCard {
+  id                    String         @id @default(uuid())
+  programId             String
+  currentStamps         Int            @default(0)
+  totalStampsCollected  Int            @default(0)
+  rewardsRedeemed       Int            @default(0)
+  // Pro-Karte-Geheimnis; Schlüssel für die QR-Signatur. Neu würfeln = alte QR-Codes ungültig.
+  secretToken           String
+  // Für die serverseitige Abkühlzeit (Doppelscan-Schutz), atomar im UPDATE geprüft.
+  lastStampAt           DateTime?
+  createdAt             DateTime       @default(now())
+  updatedAt             DateTime       @updatedAt
+  program               LoyaltyProgram @relation(fields: [programId], references: [id], onDelete: Cascade)
+  transactions          Transaction[]
+
+  @@index([programId])
+}
+
+model Transaction {
+  id        String          @id @default(cuid())
+  cardId    String
+  type      TransactionType
+  createdAt DateTime        @default(now())
+  card      CustomerCard    @relation(fields: [cardId], references: [id], onDelete: Cascade)
+
+  @@index([cardId, createdAt])
+}

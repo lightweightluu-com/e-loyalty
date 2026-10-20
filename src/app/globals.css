@@ -1,0 +1,35 @@
+@import 'tailwindcss';
+
+@layer base {
+  :root { color-scheme: light dark; }
+  :focus-visible { outline: 2px solid currentColor; outline-offset: 2px; }
+  @media (prefers-reduced-motion: reduce) { *, ::before, ::after { animation-duration: .01ms !important; transition-duration: .01ms !important; } }
+}
+
+@utility btn {
+  @apply inline-flex min-h-12 items-center justify-center gap-2 rounded-xl px-5 text-base font-medium transition active:scale-[.98] disabled:opacity-50;
+}
+
+@utility btn-primary {
+  @apply btn bg-emerald-800 text-white hover:bg-emerald-700 dark:bg-emerald-600 dark:hover:bg-emerald-500;
+}
+
+@utility btn-ghost {
+  @apply btn border border-stone-300 hover:bg-stone-100 dark:border-stone-700 dark:hover:bg-stone-800;
+}
+
+@utility input {
+  @apply min-h-12 w-full rounded-xl border border-stone-300 bg-white px-4 text-base dark:border-stone-700 dark:bg-stone-900;
+}
+
+@utility label {
+  @apply mb-1.5 block text-sm font-medium text-stone-700 dark:text-stone-300;
+}
+
+@utility panel {
+  @apply rounded-2xl border border-stone-200 bg-white p-5 dark:border-stone-800 dark:bg-stone-900;
+}
+
+@utility page {
+  @apply mx-auto w-full max-w-xl px-4 py-6 pt-[max(1.5rem,env(safe-area-inset-top))] pb-[max(1.5rem,env(safe-area-inset-bottom))];
+}

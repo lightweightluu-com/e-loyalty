@@ -7,3 +7,11 @@ wrangler.jsonc
 *.log
 .env
 .dev.vars
+
+.next/
+*.db
+*.db-journal
+.env*
+!.env.example
+next-env.d.ts
+*.tsbuildinfo
