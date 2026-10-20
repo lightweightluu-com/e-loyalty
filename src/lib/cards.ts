@@ -12,6 +12,7 @@ export function toSnapshot(card: CardWithProgram, nowMs = Date.now()) {
   const qr = createQrPayload(card, nowMs);
   return {
     cardId: card.id,
+    programId: card.programId,
     shopName: p.shopName,
     logoEmoji: p.logoEmoji,
     primaryColor: p.primaryColor,

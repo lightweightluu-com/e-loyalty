@@ -16,13 +16,27 @@ npm run dev
 
 Tests: `npm test` (Krypto) · End-to-End: `PROGRAM_ID=<aus db:seed> STAMP_COOLDOWN_SECONDS=0 npm start`, dann `PROGRAM_ID=… BASE=http://localhost:3000 node scripts/smoke.mjs`.
 
-## API (Teil 1)
+## Seiten (Teil 2)
+| Route | Zweck |
+|---|---|
+| `/login` | Händler: Anmelden / Registrieren |
+| `/dashboard` · `/dashboard/new` · `/dashboard/[id]` | Übersicht, Karten-Editor mit Live-Vorschau, Aufsteller-QR |
+| `/poster/[id]` | A4-Plakat zum Drucken / «Als PDF speichern» |
+| `/scan` | Scanner-Kiosk: Vollbild-Kamera, Ton + Vibration, «Prämie einlösen» |
+| `/join/[id]` | Ziel des Aufsteller-QR: erstellt/findet die Karte, leitet weiter |
+| `/card/[id]` | Kundenkarte mit Live-Stempelanimation (SSE), QR, Home-Bildschirm-Hinweis |
+
+Die Kamera im Browser braucht HTTPS (ausser auf `localhost`).
+
+## API
 | Route | Zweck |
 |---|---|
 | `POST /api/auth/register` · `login` · `logout` | Händler-Session (signiertes httpOnly-Cookie) |
 | `POST /api/programs/[programId]/cards` | Karte beim Scan des Aufstellers erzeugen (idempotent per Body/Cookie) |
 | `GET /api/cards/[cardId]/status` | Kartenzustand + aktueller QR-Payload (Polling-Fallback) |
 | `GET /api/cards/[cardId]/stream` | SSE: Live-Updates der Karte |
+| `GET/POST /api/merchant/programs` | Händler: Programme auflisten / erstellen |
+| `GET /api/cards/[cardId]/wallet/[google\|apple]` | Weiterleitung zum Wallet-Link (404, solange nicht konfiguriert) |
 | `POST /api/merchant/scan` | Händler: `{payload}` stempelt / meldet „Prämie bereit“; `{action:"REDEEM",cardId,ticket}` löst ein |
 
 ## Sicherheit

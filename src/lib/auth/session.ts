@@ -47,3 +47,10 @@ export async function getCurrentMerchant() {
   const id = readSessionToken((await cookies()).get(SESSION_COOKIE)?.value);
   return id ? db.merchant.findUnique({ where: { id }, select: { id: true, email: true, name: true } }) : null;
 }
+
+/** Für Server-Komponenten: Händler oder Weiterleitung auf /login. */
+export async function requireMerchant() {
+  const merchant = await getCurrentMerchant();
+  if (!merchant) (await import('next/navigation')).redirect('/login');
+  return merchant!;
+}

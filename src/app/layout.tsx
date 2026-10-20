@@ -3,6 +3,7 @@ import './globals.css';
 
 export const metadata: Metadata = {
   title: 'E-Loyalty – digitale Stempelkarten',
+  icons: { icon: '/favicon.svg', apple: '/apple-touch-icon.png' },
   description: 'Digitale Stempelkarten für lokale Geschäfte – ohne App, ohne Registrierung.',
 };
 
