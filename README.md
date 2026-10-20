@@ -1,21 +1,36 @@
-# pwa-template
+# E-Loyalty
 
-Vorlage für PWAs, die automatisch auf `<repo-name>.lightweightluu.com` live gehen.
+Digitale Stempelkarten für lokale Geschäfte: Kunden scannen einen QR-Aufsteller, bekommen sofort eine
+Wallet-artige Web-Karte (kein Login, keine App), der Händler stempelt per Kamera-Scan – live auf dem Kunden-Handy.
 
-## Neues Projekt starten
-1. Auf GitHub **„Use this template“ → Create a new repository** (Owner: `lightweightluu-com`).
-2. Repo-Name = Subdomain, z.B. `rezepte` → `rezepte.lightweightluu.com`.
-   Nur Kleinbuchstaben, Zahlen und Bindestriche verwenden.
-3. Repo in Claude Code öffnen und beschreiben, was gebaut werden soll.
-4. Jeder Push auf `main` deployt automatisch. Die URL steht in der Zusammenfassung des Actions-Laufs.
+Stack: Next.js 15 (App Router, TypeScript) · Prisma + SQLite · Tailwind · Framer Motion.
 
-## Lokal
+## Lokal starten
 ```bash
 npm install
+cp .env.example .env          # AUTH_SECRET und QR_SIGNING_SECRET setzen: openssl rand -base64 48
+npx prisma db push
+npm run db:seed               # Demo-Händler demo@kebab.ch / demo1234
 npm run dev
 ```
 
-## Voraussetzungen (einmalig, bereits erledigt)
-- Org-Secrets `CLOUDFLARE_API_TOKEN` und `CLOUDFLARE_ACCOUNT_ID` für alle Repos.
-- Zone `lightweightluu.com` in Cloudflare.
-- Für die gewünschte Subdomain darf noch kein DNS-Eintrag existieren.
+Tests: `npm test` (Krypto) · End-to-End: `PROGRAM_ID=<aus db:seed> STAMP_COOLDOWN_SECONDS=0 npm start`, dann `PROGRAM_ID=… BASE=http://localhost:3000 node scripts/smoke.mjs`.
+
+## API (Teil 1)
+| Route | Zweck |
+|---|---|
+| `POST /api/auth/register` · `login` · `logout` | Händler-Session (signiertes httpOnly-Cookie) |
+| `POST /api/programs/[programId]/cards` | Karte beim Scan des Aufstellers erzeugen (idempotent per Body/Cookie) |
+| `GET /api/cards/[cardId]/status` | Kartenzustand + aktueller QR-Payload (Polling-Fallback) |
+| `GET /api/cards/[cardId]/stream` | SSE: Live-Updates der Karte |
+| `POST /api/merchant/scan` | Händler: `{payload}` stempelt / meldet „Prämie bereit“; `{action:"REDEEM",cardId,ticket}` löst ein |
+
+## Sicherheit
+Der Kunden-QR enthält `LC1.<cardId>.<30s-Fenster>.<HMAC>` – keine URL. Gültig ~60 s, Schlüssel aus Server-Secret
+und Kartengeheimnis, einlösbar nur mit Händler-Session und nur beim Händler, dem das Programm gehört.
+Stempel sind atomar (Bedingungen im SQL-`UPDATE`) mit serverseitiger Abkühlzeit gegen Doppelscans.
+
+## Deployment
+⚠️ Dieses Projekt braucht einen Node-Server (SQLite, SSE) und ist **nicht** mit dem statischen
+Cloudflare-Workflow aus `.github/workflows/deploy.yml` (`dist/`) kompatibel. Nicht auf `main` mergen,
+bevor das Deployment geklärt ist.
